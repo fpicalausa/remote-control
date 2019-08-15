@@ -22,16 +22,29 @@ class FakePi:
         self.log = []
 
     def write(self, pin, level):
-        self.log.append( (pin, level, time.perf_counter_ns()) )
+        self.log.append( (pin, 'set', level, time.perf_counter_ns()) )
 
     def hardware_PWM(self, pin, freq, duty):
-        self.log.append( (pin, freq, time.perf_counter_ns()) )
+        self.log.append( (pin, 'pwm', freq, time.perf_counter_ns()) )
 
     def printout(self):
-        p = self.log[0][2]
-        for pin, lvl, ns in self.log:
-            print(pin, lvl, ns, (ns-p) // 1000)
+        p = self.log[0][3]
+        st = 0
+        # for pin, cmd, lvl, ns in self.log:
+        #    print(pin, cmd, lvl, ns, (ns-p) // 1000)
+        #    p = ns
+        for _, cmd, lvl, ns in self.log:
+            gap = (ns-p) // 1000
             p = ns
+            on = cmd == 'pwm'
+            off = cmd == 'set' and lvl == 0
+
+            if not on and not off:
+                print("Unexpected state!")
+            nst = 1 if on else 0
+            print(st, '->', nst, gap)
+            st=nst
+
 
 pi = FakePi()
 io = IO(pi, 18, 33000, 1000000.0 / 2)
@@ -42,13 +55,11 @@ atexit.register(cleanup)
 transport = Transport(io, framing)
 
 frame = framing.frame()
-frame.add_bits(0b0100, 4)
+frame.add_bytes(
+    0b00101000, 0b11000110, 0b00000000, 
+    0b00001000, 0b00001000, 0b01000000
+)
 
-transport.send_frame(frame)
-transport.send_frame(frame)
-transport.send_frame(frame)
-transport.send_frame(frame)
-transport.send_frame(frame)
 transport.send_frame(frame)
 
 pi.printout()

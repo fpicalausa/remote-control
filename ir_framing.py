@@ -1,7 +1,5 @@
 import ir_frame
 
-
-
 class IRFraming:
     def __init__(self, 
         header_pulse, header_space,

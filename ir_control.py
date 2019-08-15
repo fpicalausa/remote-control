@@ -13,21 +13,14 @@ class IO:
     def on(self):
         self.pi.hardware_PWM(self.pin, self.f, 1_000_000 * self.duty_cycle)
 
-    def pulse(self, micros):
-        ns = micros * 1000
+    def pulse_space(self, micro_pulse, micro_space):
+        ns_pulse_end = micro_pulse * 1000
+        ns_space_end = ns_pulse_end + micro_space * 1000
+
         start = time.perf_counter_ns()
         self.on()
-        while (time.perf_counter_ns() - start < ns):
+        while (time.perf_counter_ns() - start < ns_pulse_end):
             pass
         self.off()
-
-    def space(self, micros):
-        ns = micros * 1000
-        start = time.perf_counter_ns()
-        self.off()
-        while (time.perf_counter_ns() - start < ns):
+        while (time.perf_counter_ns() - start < ns_space_end):
             pass
-
-    def pulse_space(self, micro_pulse, micro_space):
-        self.pulse(micro_pulse)
-        self.space(micro_space)
