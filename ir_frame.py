@@ -1,6 +1,5 @@
 class IRFrame:
-    def __init__(self, framing):
-        self.framing = framing
+    def __init__(self):
         self.bits = []
 
     def add_bit(self, bit):
@@ -21,9 +20,3 @@ class IRFrame:
     def add_bytes(self, *args):
         for byte in args:
             self.add_byte(byte)
-
-    def _encode_bits(self, framing):
-        return [framing.one() if b else framing.zero() for b in self.bits]
-
-    def encode(self, framing):
-        return [framing.header()] + self._encode_bits(framing)

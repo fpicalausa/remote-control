@@ -1,65 +1,71 @@
 import sys
 import atexit
 import time
-# import pigpio
-from ir_control import IO
+import pigpio
 from ir_framing import IRFraming
-from ir_transport import Transport
+from ir_transport import ModulatedPinTransport, OnePinTransport
+
+PWM0 = 18
+GPIO23 = 23
 
 
 framing = IRFraming(
-    header_pulse=3350,
-    header_space=1590,
-    one_pulse=470,
-    one_space=1190,
-    zero_pulse=470,
-    zero_space=375
+    header_pulse=3338,
+    header_space=1599,
+    one_pulse=468,
+    one_space=1196,
+    zero_pulse=468,
+    zero_space=376,
+    trailer_pulse=468,
+    trailer_space=305
 )
 
-# pi = pigpio.pi
-class FakePi:
-    def __init__(self):
-        self.log = []
+pi = pigpio.pi()
 
-    def write(self, pin, level):
-        self.log.append( (pin, 'set', level, time.perf_counter_ns()) )
+if not pi:
+    exit(0)
 
-    def hardware_PWM(self, pin, freq, duty):
-        self.log.append( (pin, 'pwm', freq, time.perf_counter_ns()) )
-
-    def printout(self):
-        p = self.log[0][3]
-        st = 0
-        # for pin, cmd, lvl, ns in self.log:
-        #    print(pin, cmd, lvl, ns, (ns-p) // 1000)
-        #    p = ns
-        for _, cmd, lvl, ns in self.log:
-            gap = (ns-p) // 1000
-            p = ns
-            on = cmd == 'pwm'
-            off = cmd == 'set' and lvl == 0
-
-            if not on and not off:
-                print("Unexpected state!")
-            nst = 1 if on else 0
-            print(st, '->', nst, gap)
-            st=nst
-
-
-pi = FakePi()
-io = IO(pi, 18, 33000, 1000000.0 / 2)
 def cleanup():
-    io.off()
+    #pi.hardware_PWM(PWM0, 0, 0)
+    pi.write(PWM0, 0)
+    pi.write(GPIO23, 0)
+    pi.stop()
+
+
 atexit.register(cleanup)
 
-transport = Transport(io, framing)
+# Send a few pulse to test that the electronics is still working
+# pi.hardware_PWM(PWM0, 38000, 250000)
+# 
+# for i in range(0, 5):
+#     start = time.clock_gettime(time.CLOCK_MONOTONIC_RAW)
+#     while (time.clock_gettime(time.CLOCK_MONOTONIC_RAW) - start < 0.00048):
+#         continue
+#     pi.hardware_PWM(PWM0, 0, 0)
+# 
+#     start = time.clock_gettime(time.CLOCK_MONOTONIC_RAW)
+#     while (time.clock_gettime(time.CLOCK_MONOTONIC_RAW) - start < 0.0012):
+#         continue
 
-frame = framing.frame()
-frame.add_bytes(
-    0b00101000, 0b11000110, 0b00000000, 
+transport = OnePinTransport(pi, PWM0, 26, framing)
+#transport = ModulatedPinTransport(pi, PWM0, GPIO23, 38000, framing)
+
+frame = framing.frame_from_bytes(
+    0b00101000, 0b11000110, 0b00000000,
     0b00001000, 0b00001000, 0b01000000
 )
 
-transport.send_frame(frame)
+frame2 = framing.frame_from_bytes(
+    0b00101000, 0b11000110, 0b00000000, 0b00001000, 0b00001000,
+    0b00111111, 0b00010000, 0b00001100, 0b00000110, 0b10000000,
+    0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b11110110
+)
 
-pi.printout()
+frame3 = framing.frame_from_bytes(
+    0b00101000, 0b11000110, 0b00000000, 0b00001000, 0b00001000,
+    0b00111111, 0b00010000, 0b00001100, 0b10001110, 0b10000000,
+    0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b01111010
+)
+
+
+transport.send_frame(frame3)

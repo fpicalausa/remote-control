@@ -1,5 +1,6 @@
+import sys
 lines = []
-with open("capture_temp_20_25", 'r') as f:
+with open(sys.argv[1], 'r') as f:
     lines = f.readlines()
 
 state="header"
