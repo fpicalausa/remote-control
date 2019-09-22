@@ -1,6 +1,6 @@
 import ir_frame
 
-class IRFraming:
+class IRModulation:
     def __init__(self, 
         header_pulse, header_space,
         zero_space, zero_pulse,
@@ -15,14 +15,6 @@ class IRFraming:
         self.one_space = one_space
         self.trailer_pulse = trailer_pulse
         self.trailer_space = trailer_space
-
-    def frame(self):
-        return ir_frame.IRFrame()
-
-    def frame_from_bytes(self, *bytes):
-        frame = ir_frame.IRFrame()
-        frame.add_bytes(*bytes)
-        return frame
 
     def header(self):
         return (self.header_pulse, self.header_space)

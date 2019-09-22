@@ -1,4 +1,10 @@
-import pigpio
+import logging
+try:
+    import pigpio
+except:
+    pigpio = None
+    logging.warning("Unable to import pigpio (is it installed?). Some transport won't be available.")
+
 import time
 
 class OnePinTransport:
@@ -88,32 +94,58 @@ class ModulatedPinTransport:
         self.modulator_pin = modulator_pin
 
     def compile_frame(self, frame):
-        signal = TimedSignal()
+        header = [
+            pigpio.pulse(1 << self.pin, 0, self.framing.header_pulse),
+            pigpio.pulse(0, 1 << self.pin, self.framing.header_space)
+        ]
 
-        signal.pulse_space(self.framing.header_pulse, self.framing.header_space)
+        one = [
+            pigpio.pulse(1 << self.pin, 0, self.framing.one_pulse),
+            pigpio.pulse(0, 1 << self.pin, self.framing.one_space)
+        ]
+
+        zero = [
+            pigpio.pulse(1 << self.pin, 0, self.framing.zero_pulse),
+            pigpio.pulse(0, 1 << self.pin, self.framing.zero_space)
+        ]
+
+        trailer = [
+            pigpio.pulse(1 << self.pin, 0, self.framing.trailer_pulse),
+            pigpio.pulse(0, 1 << self.pin, self.framing.trailer_space)
+        ]
+
+        result = header
+
         for bit in frame.bits:
-            if bit == 0:
-                signal.pulse_space(self.framing.zero_pulse, self.framing.zero_space)
-            else:
-                signal.pulse_space(self.framing.one_pulse, self.framing.one_space)
-        signal.pulse_space(self.framing.trailer_pulse, self.framing.trailer_space)
+            result = result + (zero if bit == 0 else one)
 
-        return signal.result
+        result = result + trailer
+
+        return result
 
     def send_frame(self, frame):
-        signal = self.compile_frame(frame)
-
         self.pi.set_mode(self.modulator_pin, pigpio.OUTPUT)
         self.pi.write(self.modulator_pin, 0)
         self.pi.set_mode(self.pwm_pin, pigpio.OUTPUT)
         self.pi.hardware_PWM(self.pwm_pin, self.freq, 500000)
 
+        self.pi.wave_clear()
+        pulses = self.compile_frame(frame)
+        self.pi.wave_add_generic(pulses)
+        wave = self.pi.wave_create()
+
         try:
-            start = time.clock_gettime(time.CLOCK_MONOTONIC_RAW)
-            for state, deadline in signal:
-                self.pi.write(self.modulator_pin, state)
-                while ((time.clock_gettime(time.CLOCK_MONOTONIC_RAW) - start) < deadline):
-                    continue
+            self.pi.wave_send_once(wave)
+
+            while self.pi.wave_tx_busy(): # wait for waveform to be sent
+                time.sleep(0.1)
         finally:
-            self.pi.write(self.modulator_pin, 0)
+            self.pi.wave_tx_stop()
             self.pi.hardware_PWM(self.pwm_pin, 0, 0)
+            self.pi.wave_clear()
+            self.pi.write(self.modulator_pin, 0)
+
+class FakeTransport:
+   def send_frame(self, frame):
+       bytes = frame.to_bytes()
+       print(" ".join(bin(byte)[2:].zfill(8) for byte in bytes))

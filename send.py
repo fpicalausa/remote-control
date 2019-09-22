@@ -1,15 +1,23 @@
 import sys
 import atexit
 import time
-import pigpio
-from ir_framing import IRFraming
-from ir_transport import ModulatedPinTransport, OnePinTransport
+import logging
+from ir_frame import IRFrame
+from ir_modulation import IRModulation
+from ir_transport import ModulatedPinTransport, FakeTransport
+from fujitsu_remote import FujitsuRemote
+
+try:
+    import pigpio
+except:
+    logging.warning("Failed to import pigpio.")
+    pigpio = None
 
 PWM0 = 18
 GPIO23 = 23
 
 
-framing = IRFraming(
+modulation = IRModulation(
     header_pulse=3338,
     header_space=1599,
     one_pulse=468,
@@ -20,52 +28,31 @@ framing = IRFraming(
     trailer_space=305
 )
 
-pi = pigpio.pi()
+transport = FakeTransport()
 
-if not pi:
-    exit(0)
+if pigpio:
+    pi = pigpio.pi()
 
-def cleanup():
-    #pi.hardware_PWM(PWM0, 0, 0)
-    pi.write(PWM0, 0)
-    pi.write(GPIO23, 0)
-    pi.stop()
+    def cleanup():
+        pi.write(PWM0, 0)
+        pi.write(GPIO23, 0)
+        pi.stop()
+        pass
 
+    if not pi:
+        exit(0)
 
-atexit.register(cleanup)
+    #transport = OnePinTransport(pi, PWM0, 26, modulation)
+    transport = ModulatedPinTransport(pi, PWM0, GPIO23, 38000, modulation)
 
-# Send a few pulse to test that the electronics is still working
-# pi.hardware_PWM(PWM0, 38000, 250000)
-# 
-# for i in range(0, 5):
-#     start = time.clock_gettime(time.CLOCK_MONOTONIC_RAW)
-#     while (time.clock_gettime(time.CLOCK_MONOTONIC_RAW) - start < 0.00048):
-#         continue
-#     pi.hardware_PWM(PWM0, 0, 0)
-# 
-#     start = time.clock_gettime(time.CLOCK_MONOTONIC_RAW)
-#     while (time.clock_gettime(time.CLOCK_MONOTONIC_RAW) - start < 0.0012):
-#         continue
+    atexit.register(cleanup)
 
-transport = OnePinTransport(pi, PWM0, 26, framing)
-#transport = ModulatedPinTransport(pi, PWM0, GPIO23, 38000, framing)
+def send_command(command):
+    print(command)
+    frame = IRFrame()
+    frame.add_bytes(command.to_bytes())
+    transport.send_frame(frame)
 
-frame = framing.frame_from_bytes(
-    0b00101000, 0b11000110, 0b00000000,
-    0b00001000, 0b00001000, 0b01000000
-)
+remote = FujitsuRemote(send_command)
 
-frame2 = framing.frame_from_bytes(
-    0b00101000, 0b11000110, 0b00000000, 0b00001000, 0b00001000,
-    0b00111111, 0b00010000, 0b00001100, 0b00000110, 0b10000000,
-    0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b11110110
-)
-
-frame3 = framing.frame_from_bytes(
-    0b00101000, 0b11000110, 0b00000000, 0b00001000, 0b00001000,
-    0b00111111, 0b00010000, 0b00001100, 0b10001110, 0b10000000,
-    0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b01111010
-)
-
-
-transport.send_frame(frame3)
+remote.cooler(25)
