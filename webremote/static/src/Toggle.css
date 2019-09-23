@@ -1,0 +1,29 @@
+.Toggle {
+  border: none;
+  display: flex;
+  font-size: 14pt;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.Toggle input {
+  display: none;
+}
+
+.Toggle label {
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #106d82;
+  color: #353535;
+  padding:8px;
+  min-width: 50px;
+}
+
+.Toggle label:not(:first-of-type) {
+  border-left: none;
+}
+
+.Toggle input:checked + label {
+  background-color: #106d82;
+  color: #ffffff;
+}

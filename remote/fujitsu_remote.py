@@ -1,4 +1,4 @@
-from fujitsu_remote_command import *
+from .fujitsu_remote_command import *
 
 class FujitsuRemote:
     def __init__(self, on_command):

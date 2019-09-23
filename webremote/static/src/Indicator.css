@@ -1,0 +1,18 @@
+.Indicator {
+  font-size: 20pt;
+  display: flex;
+  align-items: baseline;
+}
+
+.Label {
+  flex:3;
+}
+
+.Value {
+  font-size: 30pt;
+  flex: 1;
+}
+
+.Unit {
+  font-size: 20pt;
+}

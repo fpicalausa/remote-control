@@ -1,5 +1,3 @@
-import ir_frame
-
 class IRModulation:
     def __init__(self, 
         header_pulse, header_space,

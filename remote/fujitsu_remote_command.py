@@ -50,6 +50,14 @@ class ShortCommand:
     def to_bytes(self):
         return HEADER + [self.cmd]
 
+    def __str__(self):
+        return "Short command: " + {
+            CMD_OFF: "OFF",
+            CMD_DASH: "DASH",
+            CMD_ENERGY_EFFICIENT: "ECO",
+            CMD_KAZE_MUKI: "KAZE_MUKI",
+            CMD_LONG: "LONG",
+        }[self.cmd]
 
 class LongCommand:
     def __init__(self, pwr, mode, timer_mode, temperature, fan_speed, swing, timer_time):
