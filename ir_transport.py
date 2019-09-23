@@ -95,23 +95,23 @@ class ModulatedPinTransport:
 
     def compile_frame(self, frame):
         header = [
-            pigpio.pulse(1 << self.pin, 0, self.framing.header_pulse),
-            pigpio.pulse(0, 1 << self.pin, self.framing.header_space)
+            pigpio.pulse(1 << self.modulator_pin, 0, self.framing.header_pulse),
+            pigpio.pulse(0, 1 << self.modulator_pin, self.framing.header_space)
         ]
 
         one = [
-            pigpio.pulse(1 << self.pin, 0, self.framing.one_pulse),
-            pigpio.pulse(0, 1 << self.pin, self.framing.one_space)
+            pigpio.pulse(1 << self.modulator_pin, 0, self.framing.one_pulse),
+            pigpio.pulse(0, 1 << self.modulator_pin, self.framing.one_space)
         ]
 
         zero = [
-            pigpio.pulse(1 << self.pin, 0, self.framing.zero_pulse),
-            pigpio.pulse(0, 1 << self.pin, self.framing.zero_space)
+            pigpio.pulse(1 << self.modulator_pin, 0, self.framing.zero_pulse),
+            pigpio.pulse(0, 1 << self.modulator_pin, self.framing.zero_space)
         ]
 
         trailer = [
-            pigpio.pulse(1 << self.pin, 0, self.framing.trailer_pulse),
-            pigpio.pulse(0, 1 << self.pin, self.framing.trailer_space)
+            pigpio.pulse(1 << self.modulator_pin, 0, self.framing.trailer_pulse),
+            pigpio.pulse(0, 1 << self.modulator_pin, self.framing.trailer_space)
         ]
 
         result = header
@@ -127,7 +127,7 @@ class ModulatedPinTransport:
         self.pi.set_mode(self.modulator_pin, pigpio.OUTPUT)
         self.pi.write(self.modulator_pin, 0)
         self.pi.set_mode(self.pwm_pin, pigpio.OUTPUT)
-        self.pi.hardware_PWM(self.pwm_pin, self.freq, 500000)
+        self.pi.hardware_PWM(self.pwm_pin, self.freq, 300000)
 
         self.pi.wave_clear()
         pulses = self.compile_frame(frame)
