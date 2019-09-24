@@ -14,7 +14,7 @@ class FujitsuRemote:
         self.on_command(ShortCommand(CMD_OFF))
         self._on = False
 
-    def on(sefl):
+    def on(self):
         self.on_command(ShortCommand(CMD_OFF))
         self._on = True
 

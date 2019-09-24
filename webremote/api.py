@@ -9,3 +9,8 @@ remote = None
 def off():
     remote.off()
     return json.dumps({ 'status': 'ok' })
+
+@web.route('/api/on', methods=['POST'])
+def on():
+    remote.on()
+    return json.dumps({ 'status': 'ok' })
