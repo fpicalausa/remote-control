@@ -1,4 +1,17 @@
 .Option-row {
   margin-top: 24px;
   font-variant: small-caps;
+  display: flex;
+  justify-content: center;
+}
+
+i.small {
+  font-size: 80%;
+}
+
+input[type="number"] {
+  line-height: 32px;
+  font-size: 30pt;
+  border: 1px solid #106d82;
+  text-align: center;
 }

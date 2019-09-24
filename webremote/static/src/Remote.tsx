@@ -1,46 +1,18 @@
 import React from "react";
 import "./Remote.css";
 import Toggle from "./Toggle";
+import { RemoteMode, RemoteFanSpeed, RemoteState } from "./Client";
 
-export const ACTION_PWR = 'power';
-export const ACTION_MODE = 'mode';
-
-type BoolAction = 'power'
-type StringAction = 'mode' | 'fanspd'
-
-export type Action = {
-  action: BoolAction,
-  payload: boolean,
-} | {
-  action: StringAction,
-  payload: string,
-};
+export const ACTION_PWR = "power";
+export const ACTION_MODE = "mode";
 
 const Remote: React.FC<{
-  onChange: (action: Action) => void,
-  state: {
-    power: boolean,
-    mode: string
-  }
-}> = ({
-  onChange,
-  state
-}) => {
-  const {power, mode} = state;
-
-  function setPower(value: boolean) {
-    onChange({
-      action: ACTION_PWR,
-      payload: value
-    })
-  }
-
-  function setMode(value: string) {
-    onChange({
-      action: ACTION_MODE,
-      payload: value
-    })
-  }
+  onPowerChange: (power: boolean) => void;
+  onModeChange: (mode: RemoteMode) => void;
+  onFanSpeedChange: (mode: RemoteFanSpeed) => void;
+  state: RemoteState;
+}> = ({ onPowerChange, onModeChange, onFanSpeedChange, state }) => {
+  const { power, mode, fan_speed, temperature } = state;
 
   return (
     <>
@@ -49,7 +21,7 @@ const Remote: React.FC<{
           id="pwr-on"
           value={true}
           checked={power}
-          onChange={setPower}
+          onChange={onPowerChange}
         >
           On
         </Toggle.Button>
@@ -57,7 +29,7 @@ const Remote: React.FC<{
           id="pwr-off"
           value={false}
           checked={!power}
-          onChange={setPower}
+          onChange={onPowerChange}
         >
           Off
         </Toggle.Button>
@@ -68,7 +40,7 @@ const Remote: React.FC<{
           id="mode-auto"
           value={"auto"}
           checked={mode === "auto"}
-          onChange={setMode}
+          onChange={onModeChange}
         >
           Auto
         </Toggle.Button>
@@ -76,7 +48,7 @@ const Remote: React.FC<{
           id="mode-cooler"
           value={"cooler"}
           checked={mode === "cooler"}
-          onChange={setMode}
+          onChange={onModeChange}
         >
           <i className="far fa-snowflake"></i>
         </Toggle.Button>
@@ -84,11 +56,42 @@ const Remote: React.FC<{
           id="mode-heater"
           value={"heater"}
           checked={mode === "heater"}
-          onChange={setMode}
+          onChange={onModeChange}
         >
           <i className="fas fa-sun"></i>
         </Toggle.Button>
       </Toggle>
+
+      <Toggle className="Option-row">
+        <Toggle.Button
+          id="speed-auto"
+          value={"auto"}
+          checked={fan_speed === "auto"}
+          onChange={onFanSpeedChange}
+        >
+          Auto
+        </Toggle.Button>
+        <Toggle.Button
+          id="speed-high"
+          value={"high"}
+          checked={fan_speed === "high"}
+          onChange={onFanSpeedChange}
+        >
+          <i className="fas fa-fan"></i>
+        </Toggle.Button>
+        <Toggle.Button
+          id="speed-low"
+          value={"low"}
+          checked={fan_speed === "low"}
+          onChange={onFanSpeedChange}
+        >
+          <i className="fas fa-fan small"></i>
+        </Toggle.Button>
+      </Toggle>
+
+      <div className="Option-row">
+        <input type="Number" min={22} max={30} value={temperature} />
+      </div>
     </>
   );
 };

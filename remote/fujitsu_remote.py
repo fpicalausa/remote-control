@@ -18,18 +18,16 @@ class FujitsuRemote:
         self.on_command(self._long_command())
         self._on = True
 
-    def temperature(self, temperature):
+    def change_temperature(self, temperature):
         self._temperature = temperature
         self.on_command(self._long_command())
         self._on = True
 
+    def change_mode(self, mode):
+        if mode not in [MODE_AUTO, MODE_COOLER, MODE_DRY, MODE_FAN, MODE_HEATER]:
+            raise ValueError('Unknown mode: ' + str(mode))
 
-    def cooler(self):
-        self._mode = MODE_COOLER
-        self.on_command(self._long_command())
-
-    def heater(self):
-        self._mode = MODE_HEATER
+        self._mode = mode
         self.on_command(self._long_command())
     
     def change_swing(self, enable):
@@ -51,10 +49,10 @@ class FujitsuRemote:
     def is_on(self):
         return self._on
 
-    def get_temperature(self):
+    def temperature(self):
         return self._temperature
 
-    def get_mode(self):
+    def mode(self):
         return {
             MODE_COOLER: "cooler",
             MODE_HEATER: "heater",
