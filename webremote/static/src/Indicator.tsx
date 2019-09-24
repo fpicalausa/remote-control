@@ -1,12 +1,11 @@
 import React from "react";
-import PropTypes, { InferProps } from "prop-types";
 import "./Indicator.css";
 
-export default function Indicator({
-  label,
-  value,
-  unit
-}: InferProps<typeof Indicator.propTypes>) {
+const Indicator: React.FC<{
+  label: string;
+  value: any;
+  unit: string;
+}> = ({ label, value, unit }) => {
   return (
     <div className="Indicator">
       <span className="Label">{label}</span>
@@ -16,10 +15,6 @@ export default function Indicator({
       </span>
     </div>
   );
-}
-
-Indicator.propTypes = {
-  label: PropTypes.string.isRequired,
-  unit: PropTypes.string.isRequired,
-  value: PropTypes.number.isRequired
 };
+
+export default Indicator;

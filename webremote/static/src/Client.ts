@@ -1,8 +1,8 @@
 export default class Client {
   url_base = "/api/";
 
-  off() {
-    let url = this.url_base + "off";
+  _post(endpoint: string) {
+    let url = this.url_base + endpoint;
     let options = {
       method: "POST",
       headers: {
@@ -12,4 +12,28 @@ export default class Client {
     };
     fetch(url, options);
   }
+
+  off() {
+    this._post("off");
+  }
+
+  on() {
+    this._post("on");
+  }
+
+  async state() {
+    const result = await fetch(this.url_base + "state");
+    return (await result.json()) as RemoteState;
+    /*
+   return {
+     power: false,
+     mode: "auto"
+   }
+   */
+  }
 }
+
+export type RemoteState = {
+  mode: string;
+  power: boolean;
+};

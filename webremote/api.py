@@ -14,3 +14,11 @@ def off():
 def on():
     remote.on()
     return json.dumps({ 'status': 'ok' })
+
+@web.route('/api/state', methods=['GET'])
+def get_state():
+    return json.dumps({ 
+        'temperature': remote.get_temperature(),
+        'mode': remote.get_mode(),
+        'power': remote.is_on(),
+     })
