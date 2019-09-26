@@ -55,6 +55,17 @@ def fan():
     remote.change_fan_speed(modes[data["speed"]])
     return json.dumps({ 'status': 'ok' })
 
+@web.route('/api/temperature', methods=['POST'])
+def temperature():
+    data = request.json
+
+    if not data or not "temperature" in data:
+        abort(400)
+
+    remote.change_temperature(data["temperature"])
+    return json.dumps({ 'status': 'ok' })
+
+
 
 @web.route('/api/state', methods=['GET'])
 def get_state():

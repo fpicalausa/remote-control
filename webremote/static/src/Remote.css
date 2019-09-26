@@ -1,17 +1,24 @@
 .Option-row {
   margin-top: 24px;
   font-variant: small-caps;
+}
+
+.Option-row_slider {
+  text-align: slider;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 i.small {
   font-size: 80%;
 }
 
-input[type="number"] {
-  line-height: 32px;
-  font-size: 30pt;
-  border: 1px solid #106d82;
-  text-align: center;
+.rc-slider {
+  max-width:200px;
+}
+
+.Target-temperature {
+  margin-top: 12px;
+  font-size: 20pt;
 }

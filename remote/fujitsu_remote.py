@@ -19,6 +19,13 @@ class FujitsuRemote:
         self._on = True
 
     def change_temperature(self, temperature):
+        if self._mode == MODE_HEATER:
+            if not (TEMP_MIN_HEAT_C <= temperature <= TEMP_MAX_C):
+                raise ValueError("Temperature out of range: " + str(temperature))
+        else:
+            if not (TEMP_MIN_C <= temperature <= TEMP_MAX_C):
+                raise ValueError("Temperature out of range: " + str(temperature))
+
         self._temperature = temperature
         self.on_command(self._long_command())
         self._on = True

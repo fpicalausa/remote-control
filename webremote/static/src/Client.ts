@@ -34,10 +34,13 @@ export default class Client {
     this._post("fan", { speed });
   }
 
+  temperature(temperature: number) {
+    this._post("temperature", { temperature });
+  }
+
   async state() {
     const result = await fetch(this.url_base + "state");
     return (await result.json()) as RemoteState;
-    //return START_STATE;
   }
 }
 

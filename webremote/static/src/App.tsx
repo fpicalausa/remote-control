@@ -42,6 +42,15 @@ const App: React.FC = () => {
     }));
   }
 
+  function onTemperatureChange(temperature: number) {
+    client.temperature(temperature);
+
+    setRemoteState(state => ({
+      ...state,
+      temperature: temperature
+    }));
+  }
+
   useEffect(() => {
     client.state().then(remote => {
       setRemoteState(remote);
@@ -64,6 +73,7 @@ const App: React.FC = () => {
           onPowerChange={onPowerChange}
           onModeChange={onModeChange}
           onFanSpeedChange={onSpeedChange}
+          onTemperatureChange={onTemperatureChange}
           state={remoteState}
         ></Remote>
       </main>

@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Remote.css";
 import Toggle from "./Toggle";
 import { RemoteMode, RemoteFanSpeed, RemoteState } from "./Client";
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
 
 export const ACTION_PWR = "power";
 export const ACTION_MODE = "mode";
@@ -9,10 +11,20 @@ export const ACTION_MODE = "mode";
 const Remote: React.FC<{
   onPowerChange: (power: boolean) => void;
   onModeChange: (mode: RemoteMode) => void;
-  onFanSpeedChange: (mode: RemoteFanSpeed) => void;
+  onFanSpeedChange: (fan_speed: RemoteFanSpeed) => void;
+  onTemperatureChange: (temperature: number) => void;
   state: RemoteState;
-}> = ({ onPowerChange, onModeChange, onFanSpeedChange, state }) => {
+}> = ({
+  onPowerChange,
+  onModeChange,
+  onFanSpeedChange,
+  onTemperatureChange,
+  state
+}) => {
   const { power, mode, fan_speed, temperature } = state;
+  const minTemp = mode === "heater" ? 20 : 22;
+  const maxTemp = 30;
+  const [current_temperature, setTemperatureState] = useState(temperature);
 
   return (
     <>
@@ -89,8 +101,28 @@ const Remote: React.FC<{
         </Toggle.Button>
       </Toggle>
 
-      <div className="Option-row">
-        <input type="Number" min={22} max={30} value={temperature} />
+      <div className="Option-row Option-row_slider">
+        <Slider
+          min={minTemp}
+          max={maxTemp}
+          value={current_temperature}
+          onChange={setTemperatureState}
+          onAfterChange={onTemperatureChange}
+          trackStyle={{ backgroundColor: "transparent", height: 6 }}
+          railStyle={{
+            backgroundColor: "#106d82",
+            height: 6
+          }}
+          handleStyle={{
+            border: "1px solid #106d82",
+            height: 20,
+            width: 20,
+            marginLeft: 0,
+            marginTop: -7,
+            backgroundColor: "white"
+          }}
+        />
+        <div className="Target-temperature">{current_temperature}°C</div>
       </div>
     </>
   );
