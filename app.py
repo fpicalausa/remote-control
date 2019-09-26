@@ -32,7 +32,6 @@ def make_pigpio_transport():
 
     def cleanup():
         pi.write(GPIO18, 0)
-        pi.write(GPIO23, 0)
         pi.stop()
 
     atexit.register(cleanup)
