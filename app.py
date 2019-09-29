@@ -2,9 +2,12 @@ from flask import Flask
 from webremote import web, api
 from remote.fujitsu_remote import FujitsuRemote
 from ir import IRFrame, IRModulation, FakeTransport, OnePinTransport
+from dht11 import DHT11
+import logging
 import atexit
 
-GPIO18 = 18 # has PWM0 capability
+GPIO14 = 14
+GPIO18 = 18
 
 try:
     import pigpio
@@ -25,33 +28,41 @@ modulation = IRModulation(
 
 transport = FakeTransport()
 
-def make_pigpio_transport():
+
+def make_pigpio_pi():
     pi = pigpio.pi()
     if not pi.connected:
         return None
 
     def cleanup():
+        pi.read(GPIO14, 0)
         pi.write(GPIO18, 0)
         pi.stop()
 
     atexit.register(cleanup)
+    return pi
 
-    return OnePinTransport(pi, GPIO18, 26, modulation)
-    #return ModulatedPinTransport(pi, GPIO18, GPIO23, 38000, modulation)
 
 if pigpio:
-    transport = make_pigpio_transport()
+    pi = make_pigpio_pi()
 
-app = Flask(__name__, static_folder='webremote/static/build/static')
+if not pi:
+    logging.warning("Unable to connect to pigpio. Aborting.")
+    exit(1)
 
-app.register_blueprint(web.web)
-app.register_blueprint(api.web)
+ir_transport = OnePinTransport(pi, GPIO18, 26, modulation)
+
 
 def send_command(command):
     print(str(command))
     frame = IRFrame()
     frame.add_bytes(command.to_bytes())
-    transport.send_frame(frame)
+    ir_transport.send_frame(frame)
+
+
+app = Flask(__name__, static_folder='webremote/static/build/static')
+app.register_blueprint(web.web)
+app.register_blueprint(api.web)
 
 api.remote = FujitsuRemote(on_command=send_command)
 
