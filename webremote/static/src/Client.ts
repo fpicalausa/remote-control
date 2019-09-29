@@ -38,6 +38,16 @@ export default class Client {
     this._post("temperature", { temperature });
   }
 
+  async sensor() {
+    const result = await fetch(this.url_base + "get_sensor");
+    const json = await result.json()
+    if (json.length == 0) {
+      return null;
+    }
+
+    return json[0] as CurrentCondition
+  }
+
   async state() {
     const result = await fetch(this.url_base + "state");
     return (await result.json()) as RemoteState;

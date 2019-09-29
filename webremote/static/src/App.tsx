@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import Indicator from "./Indicator";
 import Remote from "./Remote";
-import Client, { RemoteMode, START_STATE, RemoteFanSpeed } from "./Client";
+import Client, { RemoteMode, START_STATE, RemoteFanSpeed, CurrentCondition } from "./Client";
 
 const client = new Client();
 
 const App: React.FC = () => {
   const [remoteState, setRemoteState] = useState(START_STATE);
   const [loading, setLoading] = useState(true);
-  const [current] = useState({ temperature: 29, humidity: 51 });
+  const [current, setCurrent] = useState<null | CurrentCondition>(null);
 
   function onPowerChange(power: boolean) {
     if (power) {
@@ -54,6 +54,12 @@ const App: React.FC = () => {
   useEffect(() => {
     client.state().then(remote => {
       setRemoteState(remote);
+
+      client.sensor().then(condition => {
+        setCurrent(condition)
+      })
+
+
       setLoading(false);
     });
   }, []);
@@ -65,8 +71,8 @@ const App: React.FC = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <Indicator label="Temperature" value={current.temperature} unit="°C" />
-        <Indicator label="Humidity" value={current.humidity} unit="%" />
+        <Indicator label="Temperature" value={current ? current.temperature : 'N/A'} unit="°C" />
+        <Indicator label="Humidity" value={current ? current.humidity : 'N/A'} unit="%" />
       </header>
       <main className="App-main">
         <Remote
