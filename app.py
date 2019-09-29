@@ -2,11 +2,9 @@ from flask import Flask
 from webremote import web, api
 from remote.fujitsu_remote import FujitsuRemote
 from ir import IRFrame, IRModulation, FakeTransport, OnePinTransport
-from dht11 import DHT11
 import logging
 import atexit
 
-GPIO14 = 14
 GPIO18 = 18
 
 try:
@@ -35,7 +33,6 @@ def make_pigpio_pi():
         return None
 
     def cleanup():
-        pi.read(GPIO14, 0)
         pi.write(GPIO18, 0)
         pi.stop()
 
