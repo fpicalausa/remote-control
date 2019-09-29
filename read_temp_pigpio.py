@@ -11,15 +11,8 @@ except:
 GPIO14 = 14
 
 SERIAL_START_HOLD = 18000000
-SERIAL_RESPONSE_WAIT = 40000
-SERIAL_RESPONSE_MARK = 80000
-SERIAL_BIT_MARK = 50000
-SERIAL_ONE_MARK = 30000
-SERIAL_ZERO_MARK = 70000
-SERIAL_NO_MORE_DATA = 200000
+SERIAL_NO_MORE_DATA = 1 #ms
 
-STATE_INIT = 0
-STATE_SEND_START = 1
 STATE_WAIT_RESPONSE = 2
 STATE_RESPONSE_LO = 3
 STATE_RESPONSE_HI = 4
@@ -42,7 +35,16 @@ class SingleWireSerialTransport:
         time.sleep(0.1)
 
     def _on_edge(self, gpio, level, tick):
+        print(level, tick)
         self.changes.append((level, tick))
+
+    def _transition(self, actual, expected, next_state):
+        if (actual == 2):
+            raise ValueError("Timed out while reading")
+        if (actual != expected):
+            raise ValueError("Unexpected level: " + str(actual)) 
+
+        return next_state
 
     def read(self):
         last_transition = time.time_ns()
@@ -54,15 +56,43 @@ class SingleWireSerialTransport:
             continue
         self.pi.set_mode(self.pin, pigpio.INPUT)
         cb = self.pi.callback(self.pin, pigpio.EITHER_EDGE, self._on_edge)
-        self.pi.set_watchdog(self.pin, 1)
+        self.pi.set_watchdog(self.pin, SERIAL_NO_MORE_DATA)
 
-        while (self.changes and self.changes[-1][0] != pigpio.TIMEOUT):
+        while (len(self.changes) == 0 or self.changes[-1][0] != pigpio.TIMEOUT):
             continue
         self.pi.set_watchdog(self.pin, 0)
         cb.cancel()
 
-        print(self.changes)
-        return []
+        state = STATE_WAIT_RESPONSE
+        last_tick = self.changes[0][1]
+        bits_length = []
+        for (level, tick) in self.changes:
+            if state == STATE_WAIT_RESPONSE:
+                state = self._transition(level, 0, STATE_RESPONSE_LO)
+            if state == STATE_RESPONSE_LO:
+                state = self._transition(level, 1, STATE_RESPONSE_HI)
+            if state == STATE_RESPONSE_HI:
+                state = self._transition(level, 0, STATE_BIT_START)
+            if state == STATE_BIT_START:
+                state = self._transition(level, 1, STATE_BIT_DATA)
+            if state == STATE_BIT_DATA:
+                if (level == 2):
+                    state = STATE_END
+                if (level == 1):
+                    raise ValueError("Unexpected level: 1") 
+
+                state = STATE_BIT_START
+
+                if last_tick < tick:
+                    length = tick - last_tick
+                else:
+                    length = tick - (last_tick - 4294967295)
+                bits_length.append(length) 
+
+            last_tick = tick
+
+        mid = (min(bits_length) + max(bits_length)) / 2
+        return [0 if length < mid else 1 for length in bits_length]
 
 
 def make_pigpio_transport():

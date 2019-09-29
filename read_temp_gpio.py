@@ -89,8 +89,8 @@ class SingleWireSerialTransport:
                 elif time.time_ns() - last_transition > SERIAL_NO_MORE_DATA:
                     state = STATE_END
 
-        mid = (max(bits_length) + min(bits_length)) / 2
-        return [b for b in map(lambda b: 1 if b > mid else 0, bits_length)]
+        mid = (min(bits_length) + max(bits_length)) / 2
+        return [0 if length < mid else 1 for length in bits_length]
 
 def make_pigpio_transport():
     GPIO.setmode(GPIO.BCM)
