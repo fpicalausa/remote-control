@@ -1,7 +1,7 @@
-import atexit
-import logging
-import time
 import requests
+import logging
+import atexit
+import time
 from dht11 import DHT11
 from serial import SingleWireSerialTransport
 
@@ -39,7 +39,7 @@ dht11 = DHT11(transport)
 
 value = dht11.read()
 
-requests.post('http://localhost:4000/api/update', {
+requests.post('http://localhost:4000/api/update', json={
     'temperature': value.temperature,
     'humidity': value.humidity,
 })

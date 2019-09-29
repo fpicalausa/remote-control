@@ -96,6 +96,6 @@ def update_sensor():
 
 
 @web.route('/api/sensor', methods=['GET'])
-def sensor():
+def get_sensor():
     global sensor
     return json.dumps(sensor.get_all())
