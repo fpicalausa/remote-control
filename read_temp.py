@@ -1,11 +1,12 @@
 import atexit
 import logging
 import time
+
 try:
-    import pigpio
+    import RPi.GPIO as GPIO
 except:
     logging.warning("Failed to import pigpio.")
-    pigpio = None
+    GPIO = None
 
 GPIO14 = 14
 
@@ -33,14 +34,13 @@ class SingleWireSerialTransport:
         self.pin = pin
 
     def setup(self):
-        self.pi.set_pull_up_down(self.pin, pigpio.PUD_UP)
-        self.pi.set_mode(self.pin, pigpio.INPUT)
+        self.pi.setup(self.pin, GPIO.IN, GPIO.PUD_UP)
 
         # skip any communication we might have triggered
         time.sleep(0.1)
 
     def _transition(self, target, current_state, next_state, last_transition, timeout):
-        value = self.pi.read(self.pin)
+        value = self.pi.input(self.pin)
         if value == target:
             return next_state
         elif time.time_ns() - last_transition > timeout * 20:
@@ -56,17 +56,16 @@ class SingleWireSerialTransport:
 
         while state != STATE_END:
             if old_state != state:
-                print("State: " + str(state))
                 last_transition = time.time_ns()
             old_state = state
 
             if state == STATE_INIT:
-                self.pi.set_mode(self.pin, pigpio.OUTPUT)
-                self.pi.write(self.pin, pigpio.LOW)
+                self.pi.setup(self.pin, GPIO.OUT)
+                self.pi.output(self.pin, GPIO.LOW)
                 state = STATE_SEND_START
             elif state == STATE_SEND_START:
                 if (time.time_ns() - last_transition > SERIAL_START_HOLD):
-                    self.pi.set_mode(self.pin, pigpio.INPUT)
+                    self.pi.set_mode(self.pin, GPIO.IN)
                     state = STATE_WAIT_RESPONSE
             elif state == STATE_WAIT_RESPONSE:
                 state = self._transition(
@@ -96,18 +95,16 @@ class SingleWireSerialTransport:
 
 
 def make_pigpio_transport():
-    pi = pigpio.pi()
-    if not pi.connected:
-        return None
+    GPIO.setmode(GPIO.BCM)
 
     def cleanup():
-        pi.stop()
+        GPIO.cleanup()
 
     atexit.register(cleanup)
-    return SingleWireSerialTransport(pi, GPIO14)
+    return SingleWireSerialTransport(GPIO, GPIO14)
 
 
-if not pigpio:
+if not GPIO:
     exit(1)
 
 transport = make_pigpio_transport()
