@@ -74,7 +74,7 @@ class SingleWireSerialTransport:
             elif state == STATE_RESPONSE_LO:
                 state = self._transition(
                     1, state, STATE_RESPONSE_HI, last_transition, SERIAL_RESPONSE_MARK)
-            elif state == STATE_RESPONSE_LO:
+            elif state == STATE_RESPONSE_HI:
                 state = self._transition(
                     0, state, STATE_BIT_START, last_transition, SERIAL_RESPONSE_MARK)
             elif state == STATE_BIT_START:
