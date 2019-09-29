@@ -65,7 +65,7 @@ class SingleWireSerialTransport:
                 state = STATE_SEND_START
             elif state == STATE_SEND_START:
                 if (time.time_ns() - last_transition > SERIAL_START_HOLD):
-                    self.pi.set_mode(self.pin, GPIO.IN)
+                    self.pi.setup(self.pin, GPIO.IN)
                     state = STATE_WAIT_RESPONSE
             elif state == STATE_WAIT_RESPONSE:
                 state = self._transition(
@@ -80,7 +80,7 @@ class SingleWireSerialTransport:
                 state = self._transition(
                     1, state, STATE_BIT_DATA, last_transition, SERIAL_BIT_MARK)
             elif state == STATE_BIT_DATA:
-                value = self.pi.read(self.pin)
+                value = self.pi.input(self.pin)
 
                 if value == 0:
                     length = time.time_ns() - last_transition
@@ -89,10 +89,8 @@ class SingleWireSerialTransport:
                 elif time.time_ns() - last_transition > SERIAL_NO_MORE_DATA:
                     state = STATE_END
 
-        print(min(bits_length))
-        print(max(bits_length))
-        print(str(bits_length))
-
+        mid = (max(bits_length) + min(bits_length)) / 2
+        return [b for b in map(lambda b: 1 if b > mid else 0, bits_length)]
 
 def make_pigpio_transport():
     GPIO.setmode(GPIO.BCM)
@@ -109,6 +107,18 @@ if not GPIO:
 
 transport = make_pigpio_transport()
 transport.setup()
-transport.read()
+bits = transport.read()
+
+if len(bits) != 40:
+    raise ValueError("Bad bits array: length is " + str(len(bits)))
+
+
+for i in range(0, len(bits), 8):
+    print(bits[i:i+8])
+    byte = 0
+    for bit in bits[i:i+8]:
+        byte = (byte << 1) | bit
+    print(byte)
+
 
 exit(1)
