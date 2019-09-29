@@ -86,7 +86,7 @@ class SingleWireSerialTransport:
                 if value == 0:
                     length = time.time_ns() - last_transition
                     bits_length.append(length)
-                    state = STATE_BIT_DATA
+                    state = STATE_BIT_START
                 elif time.time_ns() - last_transition > SERIAL_NO_MORE_DATA:
                     state = STATE_END
 
@@ -115,51 +115,3 @@ transport.setup()
 transport.read()
 
 exit(1)
-
-class pigpio:
-    INPUT = 1
-    OUTPUT = 2
-    PUD_UP = 1
-    LOW = 0
-    HIGH = 1
-
-class FakePi:
-    def __init__(self):
-        self.records = []
-
-    def set_mode(self, pin, mode):
-        rec = (time.time_ns(), 'set_mode', pin, "input" if mode == pigpio.INPUT else "output")
-        self.records.append(rec)
-
-    def set_pull_up_down(self, pin, pud):
-        rec = (time.time_ns(), 'set_mode', pin, "pull up" if pud == pigpio.PUD_UP else "pull down")
-        self.records.append(rec)
-
-    def read(self, pin):
-        self.records.append((time.time_ns(), 'read', pin))
-        if len(self.records) > 100:
-            raise ValueError("Bad")
-
-        start = time.time_ns()
-        while time.time_ns() - start < 1000:
-            continue
-        return pigpio.LOW
-
-    def write(self, pin, value):
-        self.records.append((time.time_ns(), 'write', pin, value))
-
-    def log(self):
-        prev = self.records[0][0]
-        for rec in self.records:
-            print(rec, rec[0] - prev)
-            prev = rec[0]
-
-
-try:
-    pi = FakePi()
-    transport = SingleWireSerialTransport(pi, GPIO14)
-    transport.setup()
-    transport.read()
-finally:
-    pi.log()
-
