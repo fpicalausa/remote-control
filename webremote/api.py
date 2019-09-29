@@ -2,15 +2,12 @@ from flask import Blueprint, request, abort
 from remote import fujitsu_remote
 from remote import fujitsu_remote_command
 import json
-import time
-
-MAX_KEEP_PERIOD = 24 * 3600
-MAX_KEEP_UPDATES = 100
+from sensor_data import SensorData
 
 web = Blueprint(__name__, "api")
 
 remote = None  # type: fujitsu_remote.FujitsuRemote
-sensor_updates = []
+sensor = SensorData()
 
 
 @web.route('/api/off', methods=['POST'])
@@ -85,39 +82,20 @@ def get_state():
     })
 
 
-def prune_updates(now):
-    global sensor_updates
-    last_valid = min(MAX_KEEP_UPDATES, len(sensor_updates))
-    while last_valid > 1:
-        updated = sensor_updates[last_valid - 1]["updated"]
-        if now - updated < MAX_KEEP_PERIOD:
-            break
-
-        last_valid = last_valid - 1
-
-    sensor_updates = sensor_updates[:last_valid]
-
-
 @web.route('/api/update', methods=['POST'])
 def update_sensor():
+    global sensor
     data = request.json
 
     if not data or ("temperature" not in data) or ("humidity" not in data):
         abort(400)
 
-    now = time.time_ns() / 1000000000
-    sensor_updates.insert(0, {
-        "temperature": data['temperature'],
-        "humidity": data['humidity'],
-        "updated": now
-    })
+    sensor.add(data['temperature'], data['humidity'])
 
-    prune_updates(now)
     return json.dumps({'status': 'ok'})
 
 
 @web.route('/api/sensor', methods=['GET'])
 def sensor():
-    now = time.time_ns() / 1000000000
-    prune_updates(now)
-    return json.dumps(sensor_updates)
+    global sensor
+    return json.dumps(sensor.get_all())
