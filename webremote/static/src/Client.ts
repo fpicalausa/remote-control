@@ -39,7 +39,7 @@ export default class Client {
   }
 
   async sensor() {
-    const result = await fetch(this.url_base + "get_sensor");
+    const result = await fetch(this.url_base + "sensor");
     const json = await result.json()
     if (json.length == 0) {
       return null;
