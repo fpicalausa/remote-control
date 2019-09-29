@@ -35,7 +35,6 @@ class SingleWireSerialTransport:
         time.sleep(0.1)
 
     def _on_edge(self, gpio, level, tick):
-        print(level, tick)
         self.changes.append((level, tick))
 
     def _transition(self, actual, expected, next_state):
@@ -69,15 +68,16 @@ class SingleWireSerialTransport:
         for (level, tick) in self.changes:
             if state == STATE_WAIT_RESPONSE:
                 state = self._transition(level, 0, STATE_RESPONSE_LO)
-            if state == STATE_RESPONSE_LO:
+            elif state == STATE_RESPONSE_LO:
                 state = self._transition(level, 1, STATE_RESPONSE_HI)
-            if state == STATE_RESPONSE_HI:
+            elif state == STATE_RESPONSE_HI:
                 state = self._transition(level, 0, STATE_BIT_START)
-            if state == STATE_BIT_START:
+            elif state == STATE_BIT_START:
                 state = self._transition(level, 1, STATE_BIT_DATA)
-            if state == STATE_BIT_DATA:
+            elif state == STATE_BIT_DATA:
                 if (level == 2):
                     state = STATE_END
+                    continue
                 if (level == 1):
                     raise ValueError("Unexpected level: 1") 
 
