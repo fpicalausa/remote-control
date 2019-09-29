@@ -52,7 +52,7 @@ class SingleWireSerialTransport:
         self.pi.write(self.pin, pigpio.LOW)
         while (time.time_ns() - last_transition < SERIAL_START_HOLD):
             continue
-        self.pi.set_mode(self.pin, pigpio.IN)
+        self.pi.set_mode(self.pin, pigpio.INPUT)
         cb = self.pi.callback(self.pin, pigpio.EITHER_EDGE, self._on_edge)
         self.pi.set_watchdog(self.pin, 1)
 
