@@ -59,6 +59,13 @@ class FujitsuRemote:
     def temperature(self):
         return self._temperature
 
+    def fan_speed(self):
+        return {
+            FAN_SPD_AUTO: "auto",
+            FAN_SPD_HIGH: "high",
+            FAN_SPD_LOW: "low"
+        }[self._fan_speed]
+
     def mode(self):
         return {
             MODE_COOLER: "cooler",

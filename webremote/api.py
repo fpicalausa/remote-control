@@ -77,6 +77,7 @@ def temperature():
 def get_state():
     return json.dumps({
         'temperature': remote.temperature(),
+        'fan_speed': remote.fan_speed(),
         'mode': remote.mode(),
         'power': remote.is_on(),
     })
