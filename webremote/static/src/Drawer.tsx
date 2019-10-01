@@ -2,7 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import './Drawer.css';
 
 const Drawer: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [isOpen, setOpen] = useState(true);
+    const [isOpen, setOpen] = useState(false);
 
     return (
         <div className="Drawer">
