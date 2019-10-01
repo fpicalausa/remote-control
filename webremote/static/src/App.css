@@ -1,9 +1,16 @@
 .App-header {
-  background-color: #000000;
-  color: white;
-  padding:12px;
+    background-color: #000000;
+    color: white;
+}
+
+.Indicators {
+    padding: 12px;
 }
 
 .App-main {
-  margin-top: 24px;
+    padding-top: 24px;
+}
+
+.Drawer svg {
+    height: 100% !important;
 }

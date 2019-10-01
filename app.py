@@ -4,8 +4,12 @@ from remote.fujitsu_remote import FujitsuRemote
 from ir import IRFrame, IRModulation, FakeTransport, OnePinTransport
 import logging
 import atexit
+from webremote.sensor_data import SensorData
+import os.path
+import json
 
 GPIO18 = 18
+HISTFILE = 'sensor.json'
 
 try:
     import pigpio
@@ -62,6 +66,29 @@ app.register_blueprint(web.web)
 app.register_blueprint(api.web)
 
 api.remote = FujitsuRemote(on_command=send_command)
+
+data = []
+if os.path.exists(HISTFILE):
+    with open(HISTFILE, 'r') as f:
+        data = [json.loads(l) for l in f.readlines]
+
+
+def on_data(data):
+    if os.path.getsize(HISTFILE) > 50000:
+        with open(HISTFILE, 'r') as f:
+            previous = [json.loads(l) for l in f.readlines][:1000]
+
+        with open(HISTFILE, 'w') as f:
+            f.write("\n".join(previous))
+            f.write("\n")
+            json.dump(data, f)
+    else:
+        with open(HISTFILE, 'a') as f:
+            f.write("\n")
+            json.dump(data, f)
+
+
+api.sensor = SensorData(data, on_data)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

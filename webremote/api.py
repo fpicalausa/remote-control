@@ -2,12 +2,11 @@ from flask import Blueprint, request, abort
 from remote import fujitsu_remote
 from remote import fujitsu_remote_command
 import json
-from .sensor_data import SensorData
 
 web = Blueprint(__name__, "api")
 
 remote = None  # type: fujitsu_remote.FujitsuRemote
-sensor = SensorData()
+sensor = None
 
 
 @web.route('/api/off', methods=['POST'])
