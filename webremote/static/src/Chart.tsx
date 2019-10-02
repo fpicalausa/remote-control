@@ -10,7 +10,6 @@ import {
     YAxis,
     ResponsiveContainer,
     CartesianGrid,
-    Label,
 } from 'recharts';
 
 const CustomizedAxisTick: React.FC<{
@@ -68,7 +67,7 @@ const Chart: React.FC<{ history: History }> = ({ history }) => {
                         value: 'Temperature',
                         angle: -90,
                         position: 'insideLeft',
-                        fill: 'white',
+                        fill: '#cf2d2d',
                         style: {
                             textAnchor: 'middle',
                         },
@@ -82,7 +81,7 @@ const Chart: React.FC<{ history: History }> = ({ history }) => {
                         value: 'Humidity',
                         angle: 90,
                         position: 'insideRight',
-                        fill: 'white',
+                        fill: '#7a7391',
                         style: {
                             textAnchor: 'middle',
                         },
@@ -92,6 +91,7 @@ const Chart: React.FC<{ history: History }> = ({ history }) => {
                     yAxisId="temperature"
                     type="monotone"
                     dataKey="temperature"
+                    strokeWidth={2}
                     stroke="#cf2d2d"
                     isAnimationActive={false}
                     dot={false}
