@@ -1,7 +1,7 @@
 import time
 
 MAX_KEEP_PERIOD = 30 * 24 * 3600
-MAX_KEEP_UPDATES = 1000
+MAX_KEEP_UPDATES = 10000
 
 
 class SensorData:
