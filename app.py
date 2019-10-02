@@ -74,9 +74,9 @@ if os.path.exists(HISTFILE):
 
 
 def on_data(data):
-    if os.path.getsize(HISTFILE) > 50000:
+    if os.path.getsize(HISTFILE) > 500000:
         with open(HISTFILE, 'r') as f:
-            previous = [json.loads(l) for l in f.readlines][:1000]
+            previous = [json.loads(l) for l in f.readlines][:5000]
 
         with open(HISTFILE, 'w') as f:
             f.write("\n".join(previous))

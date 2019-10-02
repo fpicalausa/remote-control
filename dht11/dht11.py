@@ -53,4 +53,14 @@ class DHT11:
     def read(self):
         result = self._read_with_retries()
 
-        return DHT11Reading(result[2], result[0])
+        temp = result[2]
+        temp_dec = result[3]
+        while temp_dec >= 1:
+            temp_dec = temp_dec / 10
+
+        humidity = result[0]
+        humidity_dec = result[1]
+        while humidity_dec >= 1:
+            humidity_dec = humidity_dec / 10
+
+        return DHT11Reading(temp + temp_dec, humidity + humidity_dec)
