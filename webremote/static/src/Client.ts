@@ -54,13 +54,14 @@ export default class Client {
     }
 
     async state() {
+        return START_STATE;
         const result = await fetch(this.url_base + 'state');
         return (await result.json()) as RemoteState;
     }
 }
 
-export type RemoteMode = 'auto' | 'heater' | 'cooler';
-export type RemoteFanSpeed = 'auto' | 'high' | 'low';
+export type RemoteMode = 'auto' | 'heater' | 'cooler' | 'dry' | 'fan';
+export type RemoteFanSpeed = 'auto' | 'high' | 'low' | 'quiet' | 'natural';
 
 export type RemoteState = {
     mode: RemoteMode;

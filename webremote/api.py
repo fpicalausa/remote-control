@@ -32,6 +32,8 @@ def mode():
         "auto": fujitsu_remote_command.MODE_AUTO,
         "cooler": fujitsu_remote_command.MODE_COOLER,
         "heater": fujitsu_remote_command.MODE_HEATER,
+        "dry": fujitsu_remote_command.MODE_DRY,
+        "fan": fujitsu_remote_command.MODE_FAN,
     }
 
     if not data["mode"] in modes:
@@ -52,6 +54,8 @@ def fan():
         "auto": fujitsu_remote_command.FAN_SPD_AUTO,
         "high": fujitsu_remote_command.FAN_SPD_HIGH,
         "low": fujitsu_remote_command.FAN_SPD_LOW,
+        "quiet": fujitsu_remote_command.FAN_SPD_QUIET,
+        "natural": fujitsu_remote_command.FAN_SPD_NATURAL,
     }
 
     if not data["speed"] in modes:
