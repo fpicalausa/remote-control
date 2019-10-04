@@ -54,7 +54,6 @@ export default class Client {
     }
 
     async state() {
-        return START_STATE;
         const result = await fetch(this.url_base + 'state');
         return (await result.json()) as RemoteState;
     }
@@ -77,13 +76,15 @@ export const START_STATE: RemoteState = {
     temperature: 25,
 };
 
+export type Condition = {
+    temperature: number;
+    humidity: number;
+    timestamp: number;
+};
+
 export type CurrentCondition = {
     temperature: number;
     humidity: number;
 };
 
-export type History = {
-    temperature: number;
-    humidity: number;
-    timestamp: number;
-}[];
+export type History = Condition[];

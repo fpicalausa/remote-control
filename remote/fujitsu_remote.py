@@ -1,5 +1,6 @@
 from .fujitsu_remote_command import *
 
+
 class FujitsuRemote:
     def __init__(self, on_command):
         self._on = False
@@ -9,7 +10,7 @@ class FujitsuRemote:
         self._swing = SWING_OFF
 
         self.on_command = on_command
-    
+
     def off(self):
         self.on_command(ShortCommand(CMD_OFF))
         self._on = False
@@ -21,10 +22,12 @@ class FujitsuRemote:
     def change_temperature(self, temperature):
         if self._mode == MODE_HEATER:
             if not (TEMP_MIN_HEAT_C <= temperature <= TEMP_MAX_C):
-                raise ValueError("Temperature out of range: " + str(temperature))
+                raise ValueError(
+                    "Temperature out of range: " + str(temperature))
         else:
             if not (TEMP_MIN_C <= temperature <= TEMP_MAX_C):
-                raise ValueError("Temperature out of range: " + str(temperature))
+                raise ValueError(
+                    "Temperature out of range: " + str(temperature))
 
         self._temperature = temperature
         self.on_command(self._long_command())
@@ -36,7 +39,7 @@ class FujitsuRemote:
 
         self._mode = mode
         self.on_command(self._long_command())
-    
+
     def change_swing(self, enable):
         self._swing = SWING_ON if enable else SWING_OFF
 
@@ -50,7 +53,8 @@ class FujitsuRemote:
     def _long_command(self):
         pwr = PWR_STAY_ON if self._on else PWR_TURN_ON
         self._on = True
-        temp_code = temperature_code(self._temperature, self._mode == MODE_HEATER)
+        temp_code = temperature_code(
+            self._temperature, self._mode == MODE_HEATER)
         return LongCommand(pwr, self._mode, TMR_OFF, temp_code, self._fan_speed, self._swing, 0)
 
     def is_on(self):
@@ -63,12 +67,17 @@ class FujitsuRemote:
         return {
             FAN_SPD_AUTO: "auto",
             FAN_SPD_HIGH: "high",
-            FAN_SPD_LOW: "low"
+            FAN_SPD_LOW: "low",
+            FAN_SPD_QUIET: "quiet",
+            FAN_SPD_NATURAL: "natural",
+
         }[self._fan_speed]
 
     def mode(self):
         return {
             MODE_COOLER: "cooler",
             MODE_HEATER: "heater",
-            MODE_AUTO: "auto"
+            MODE_AUTO: "auto",
+            MODE_FAN: "fan",
+            MODE_DRY: "dry",
         }[self._mode]

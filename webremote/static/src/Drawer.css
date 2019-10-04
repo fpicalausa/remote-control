@@ -15,6 +15,7 @@
     height: 50vh;
     display: flex;
     align-items: center;
+    flex-direction: column;
 }
 
 .Drawer {

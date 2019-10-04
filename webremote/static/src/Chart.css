@@ -1,3 +1,41 @@
+.axis {
+    font-size: 28px;
+}
+
+.axis line {
+    stroke: white;
+}
+
+.axis path {
+    stroke: white;
+}
+
+.axis text {
+    fill: white;
+}
+
+.Chart_ts-1 {
+    fill: none;
+    stroke: red;
+    stroke-width: 1.5px;
+}
+
+.Chart_ts-2 {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
 .Chart {
-    color: white;
+    width: 100%;
+    text-align: right;
+}
+
+.Chart button {
+    border: none;
+    background: none;
+    text-decoration: underline;
+    color: steelblue;
+    width: 50px;
+    height: 50px;
 }
