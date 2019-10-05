@@ -18,7 +18,7 @@ const Chart: React.FC<{ history: History }> = ({ history: full_history }) => {
         const maxHumidity = Math.max(...history.map(t => t.humidity)) + 5;
         const minDate = Math.min(...history.map(t => t.timestamp));
         const maxDate = Math.max(...history.map(t => t.timestamp));
-        const margin = { top: 50, right: 100, bottom: 50, left: 100 },
+        const margin = { top: 20, right: 100, bottom: 100, left: 100 },
             width = 600 - margin.left - margin.right,
             height = 400 - margin.top - margin.bottom;
 
