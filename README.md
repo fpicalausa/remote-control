@@ -5,7 +5,10 @@ In addition to sending out IR signals to control the air conditioner, it also re
 
 Find out more at https://fpicalausa.github.io/2019/10/07/Air-conditioner-what-are-we-trying-to-build.html
 
-![](screenshot.png | width=100)
+
+<img width="300" src="screenshot.png" alt="screenshot (main app)">
+<img width="300" src="screenshot2.png" alt="screenshot (temperature graph)">
+
 
 ## Using this over the Internet
 
