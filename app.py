@@ -70,7 +70,7 @@ api.remote = FujitsuRemote(on_command=send_command)
 data = []
 if os.path.exists(HISTFILE):
     with open(HISTFILE, 'r') as f:
-        data = [json.loads(l) for l in f.readlines() if l]
+        data = [json.loads(l) for l in f.readlines() if len(l.strip()) > 0]
 
 
 def on_data(data):
