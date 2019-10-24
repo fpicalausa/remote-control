@@ -59,14 +59,17 @@ class ShortCommand:
             CMD_LONG: "LONG",
         }[self.cmd]
 
+
 class LongCommand:
-    def __init__(self, pwr, mode, timer_mode, temperature, fan_speed, swing, timer_time):
+    def __init__(self, pwr, mode, timer_mode, temperature, fan_speed,
+                 swing, timer_time):
         self.pwr = pwr
         self.temperature = temperature
         self.mode = mode
         self.timer_mode = timer_mode
         self.swing = swing
         self.fan_speed = fan_speed
+        self.timer_time = timer_time
         pass
 
     def to_bytes(self):
@@ -74,19 +77,36 @@ class LongCommand:
         mode = self.mode << 4 | self.timer_mode
         fan_swing = self.fan_speed << 4 | self.swing << 0
 
-        long_cmd = [LONG_HEADER_2] + [pwr_temp, mode, fan_swing] + [0, 0, 0]
-        return HEADER + [CMD_LONG] + [LONG_HEADER_1] + long_cmd + [checksum(long_cmd)]
+        timer_bits = [0, 0, 0]
+        if self.timer_mode == TMR_ON_TIME:
+            top_nibble = (self.timer_time & 0x3C0) >> 6
+            bottom_byte = (self.timer_time & 0x3F) << 2 | 1
+            timer_bits = [0, top_nibble, bottom_byte]
+        elif self.timer_mode == TMR_OFF_TIME:
+            top_byte = (self.timer_time & 0x3FC) >> 2
+            bottom_nibble = ((self.timer_time & 0x3) << 2 | 1) << 4
+            timer_bits = [top_byte, bottom_nibble, 0]
+
+        long_cmd = [LONG_HEADER_2] + [pwr_temp, mode, fan_swing] + timer_bits
+        return HEADER + [CMD_LONG] + [LONG_HEADER_1] + long_cmd + \
+            [checksum(long_cmd)]
 
     def __str__(self):
         pwr = "TURN_ON" if self.pwr == PWR_TURN_ON else "STAY_ON"
-        temp = str(reverse_nibble(self.temperature) + TEMP_MIN_HEAT_C - TEMP_MIN)
+        temp = str(reverse_bits(self.temperature, 4) +
+                   TEMP_MIN_HEAT_C - TEMP_MIN)
 
         mode = {MODE_AUTO: "AUTO", MODE_COOLER: "COOLER", MODE_DRY: "DRY",
                 MODE_FAN: "FAN", MODE_HEATER: "HEATER", }[self.mode]
-        timer_mode = {TMR_OFF: "OFF", TMR_OFF_TIME: "Turn off after time",
-                      TMR_ON_TIME: "Turn on after time", }[self.timer_mode]
-        fan_spd = {FAN_SPD_AUTO: "AUTO", FAN_SPD_HIGH: "HIGH", FAN_SPD_LOW: "LOW",
-                   FAN_SPD_NATURAL: "NATURAL", FAN_SPD_QUIET: "QUIET", }[self.fan_speed]
+        timer_mode = {TMR_OFF: "OFF", TMR_OFF_TIME: "OFF AFTER",
+                      TMR_ON_TIME: "ON AFTER", }[self.timer_mode]
+        fan_spd = {
+            FAN_SPD_AUTO: "AUTO",
+            FAN_SPD_HIGH: "HIGH",
+            FAN_SPD_LOW: "LOW",
+            FAN_SPD_NATURAL: "NATURAL",
+            FAN_SPD_QUIET: "QUIET",
+        }[self.fan_speed]
         swing = ("ON" if self.swing == SWING_ON else "OFF")
 
         indicators = {
@@ -94,6 +114,7 @@ class LongCommand:
             "TEMP": temp,
             "MODE": mode,
             "TMR": timer_mode,
+            "TIME": str(self.timer_time / 60) + "H",
             "FAN_SPD": fan_spd,
             "SWING": swing
         }
@@ -103,19 +124,19 @@ class LongCommand:
                 "\n+------------+--------------+")
 
 
-def reverse_nibble(x):
-    result = 0
-    for _ in range(0, 4):
-        bit = x & 1
-        result = result << 1 | bit
-        x = x >> 1
-    return result
-
-
 def reverse_word(v):
-    n1 = reverse_nibble(v & 0x0f)
-    n2 = reverse_nibble((v & 0xf0) >> 4)
+    n1 = reverse_bits(v & 0x0f, 4)
+    n2 = reverse_bits((v & 0xf0) >> 4, 4)
     return (n1 << 4) | n2
+
+
+def reverse_bits(num, bits):
+    result = 0
+    while bits != 0:
+        result = (result << 1) + (num & 1)
+        num >>= 1
+        bits -= 1
+    return result
 
 
 def from_bytes(bytes):
@@ -145,15 +166,25 @@ def from_bytes(bytes):
     pwr_temp = rem[3]
     mode = rem[4]
     fan_swing = rem[5]
+    timer_mode = mode & 0xF
+    timer_time = 0
+
+    if (timer_mode == TMR_ON_TIME):
+        raw_value = ((rem[7] & 0xF) << 6) | (rem[8] >> 2)
+        timer_time = reverse_bits(raw_value, 10)
+    elif (timer_mode == TMR_OFF_TIME):
+        raw_value = ((rem[6]) << 2) | ((rem[7] & 0xF0) >> 6)
+        timer_time = reverse_bits(raw_value, 10)
 
     return LongCommand(
         (pwr_temp & 0xF0) >> 4,
         (mode & 0xF0) >> 4,
-        mode & 0xF,
+        timer_mode,
         pwr_temp & 0xF,
         (fan_swing & 0xF0) >> 4,
         fan_swing & 0xF,
-        0)
+        timer_time)
+
 
 def checksum(bytes):
     r = 0
@@ -161,10 +192,19 @@ def checksum(bytes):
         r = (r + reverse_word(w)) & 0xff
     return reverse_word((0b11111111 ^ r) + 1)
 
+
 def temperature_code(temperature, heater):
     min = TEMP_MIN_HEAT_C if heater else TEMP_MIN_C
     max = TEMP_MAX_C
     if not (min <= temperature <= max):
-        raise ValueError('Temperature must be between ' + str(min) + ' and ' + str(max))
+        raise ValueError('Temperature must be between ' +
+                         str(min) + ' and ' + str(max))
 
-    return reverse_nibble((temperature - TEMP_MIN_HEAT_C) + TEMP_MIN)
+    return reverse_bits((temperature - TEMP_MIN_HEAT_C) + TEMP_MIN, 4)
+
+
+def byte_str(byte):
+    bits = [str((byte >> i) & 1) for i in range(0, 8)]
+    return "".join(bits)
+
+
