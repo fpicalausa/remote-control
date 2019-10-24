@@ -37,9 +37,15 @@ if not pi:
 transport = SingleWireSerialTransport(pi, GPIO14)
 dht11 = DHT11(transport)
 
-value = dht11.read()
+points = []
+for i in range(0, 3):
+    points.append(dht11.read())
+    time.sleep(1.0)
+
+median_temp = sorted(points, key=lambda p: p.temperature)[1]
+median_humidity = sorted(points, key=lambda p: p.humidity)[1]
 
 requests.post('http://localhost:4000/api/update', json={
-    'temperature': value.temperature,
-    'humidity': value.humidity,
+    'temperature': median_temp,
+    'humidity': median_humidity,
 })
