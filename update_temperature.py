@@ -42,8 +42,8 @@ for i in range(0, 3):
     points.append(dht11.read())
     time.sleep(1.0)
 
-median_temp = sorted(points, key=lambda p: p.temperature)[1]
-median_humidity = sorted(points, key=lambda p: p.humidity)[1]
+median_temp = sorted(points, key=lambda p: p.temperature)[1].temperature
+median_humidity = sorted(points, key=lambda p: p.humidity)[1].humidity
 
 requests.post('http://localhost:4000/api/update', json={
     'temperature': median_temp,
