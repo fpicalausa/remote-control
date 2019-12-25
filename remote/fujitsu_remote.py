@@ -1,6 +1,5 @@
 from .fujitsu_remote_command import *
 
-
 class FujitsuRemote:
     def __init__(self, on_command):
         self._on = False
@@ -9,7 +8,16 @@ class FujitsuRemote:
         self._fan_speed = FAN_SPD_AUTO
         self._swing = SWING_OFF
 
-        self.on_command = on_command
+        self.command_listener = on_command
+        self.silent = False
+
+    def on_command(self, command):
+        if self.silent:
+            return
+        self.command_listener(command)
+
+    def set_silent(self, silent):
+        self.silent = silent
 
     def off(self):
         self.on_command(ShortCommand(CMD_OFF))
