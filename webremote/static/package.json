@@ -12,7 +12,7 @@
         "@typescript-eslint/eslint-plugin": "^2.2.0",
         "@typescript-eslint/parser": "^2.2.0",
         "camelcase": "^5.2.0",
-        "d3": "^5.12.0",
+        "d3": "^5.14.2",
         "dotenv": "6.2.0",
         "dotenv-expand": "5.1.0",
         "fs-extra": "7.0.1",
@@ -28,7 +28,7 @@
     },
     "devDependencies": {
         "@babel/core": "^7.6.2",
-        "@svgr/webpack": "4.3.2",
+        "@svgr/webpack": "5.0.0",
         "@types/rc-slider": "^8.6.5",
         "babel-eslint": "10.0.3",
         "babel-jest": "^24.9.0",
@@ -67,10 +67,10 @@
         "sass-loader": "7.2.0",
         "source-map-explorer": "^2.1.0",
         "style-loader": "1.0.0",
-        "terser-webpack-plugin": "1.4.1",
+        "terser-webpack-plugin": "2.3.1",
         "url-loader": "2.1.0",
-        "webpack": "4.40.2",
-        "webpack-dev-server": "3.2.1",
+        "webpack": "4.41.4",
+        "webpack-dev-server": "3.10.1",
         "webpack-manifest-plugin": "2.0.4"
     },
     "scripts": {
