@@ -20,7 +20,6 @@
 
 .Drawer {
     background-color: #000000;
-    position: fixed;
     width: 100%;
     margin-top: -24px;
     z-index: 999;

@@ -1,0 +1,79 @@
+.Timers {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    flex-direction: column;
+    max-width: 700px;
+    margin: 8px auto;
+}
+
+.Timers li {
+    padding: 0;
+    margin: 0;
+    margin-bottom: 8px;
+}
+
+.Timers li .edit {
+    width: 100%;
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-content: flex-start;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #cccccc;
+}
+
+.Timers-Time {
+    font-size: 140%;
+}
+
+.Timers-Action {
+    text-align: right;
+}
+
+.Timers-Command .Icon {
+    margin-right: 4px;
+}
+
+.Timers-Command .timer-icon {
+    padding: 4px;
+    text-transform: capitalize;
+    font-style: normal;
+    font-weight: bolder;
+}
+
+.Timers-Command .Temperature {
+    font-size: 140%;
+    margin-right: 8px;
+}
+
+.Timers-Action {
+    text-align: center;
+    margin: 8px;
+}
+
+.Timers-Action button {
+    background: #106d82;
+    border: 1px solid #106d82;
+    color: white;
+    margin: 4px;
+    padding: 8px;
+}
+
+.TimerEditor input[type="text"] {
+    font-size: 100%;
+    max-width: 2em;
+    text-align: center;
+}
+
+.TimeInput {
+    font-size: 140%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
