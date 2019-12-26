@@ -1,0 +1,19 @@
+/*!
+  Copyright (c) 2017 Jed Watson.
+  Licensed under the MIT License (MIT), see
+  http://jedwatson.github.io/classnames
+*/
+
+/*!******************************!*\
+        !*** ./src/thunk-reducer.js ***!
+        \******************************/
+
+/*! exports provided: default */
+
+/*! react */
+
+/*!**************************************************************************************!*\
+        !*** external {"commonjs":"react","commonjs2":"react","amd":"React","root":"React"} ***!
+        \**************************************************************************************/
+
+/*! no static exports found */
