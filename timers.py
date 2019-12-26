@@ -1,5 +1,5 @@
 from datetime import datetime
-from remote.fujitsu_remote import FujitsuRemote
+import time
 
 
 class TimerCommand:
@@ -19,6 +19,7 @@ class TimerCommand:
         # Make sure we send a power on signal.
         remote.off()
         remote.set_silent(False)
+        time.sleep(1)
         remote.on()
 
     def execute(self, remote):
