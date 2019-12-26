@@ -10,17 +10,22 @@ class TimerCommand:
         self.mode = mode
 
     def _set_full_state(self, remote):
+        remote.off()
         remote.set_silent(True)
         remote.change_temperature(self.temperature)
         remote.change_fan_speed(self.fan)
         remote.change_mode(self.mode)
+
+        # Make sure we send a power on signal.
+        remote.off()
         remote.set_silent(False)
+        remote.on()
 
     def execute(self, remote):
-        remote.off()
         if self.on:
             self._set_full_state(remote)
-            remote.on()
+        else:
+            remote.off()
 
 
 class Timer:
