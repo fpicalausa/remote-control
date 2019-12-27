@@ -1,0 +1,2 @@
+*/5 * * * * cd /home/pi/remote-control && python3 update_temperature.py
+*/1 * * * * cd /home/pi/remote-control && python3 run_timers.py
