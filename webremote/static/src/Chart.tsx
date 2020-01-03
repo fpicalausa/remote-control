@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { History, Condition } from './Client';
 import './Chart.css';
-import * as d3 from 'd3';
+import { select } from 'd3-selection';
+import { scaleLinear, scaleTime } from 'd3-scale';
+import { axisBottom, axisLeft, axisRight } from 'd3-axis';
+import { line } from 'd3-shape';
+
 
 const Chart: React.FC<{ history: History }> = ({ history: full_history }) => {
     const d3Container = useRef(null);
@@ -22,12 +26,11 @@ const Chart: React.FC<{ history: History }> = ({ history: full_history }) => {
             width = 600 - margin.left - margin.right,
             height = 400 - margin.top - margin.bottom;
 
-        d3.select(d3Container.current)
+        select(d3Container.current)
             .select('*')
             .remove();
 
-        const svg = d3
-            .select(d3Container.current)
+        const svg = select(d3Container.current)
             .attr(
                 'viewBox',
                 `0 0 ${width + margin.left + margin.right} ${height +
@@ -37,18 +40,15 @@ const Chart: React.FC<{ history: History }> = ({ history: full_history }) => {
             .append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`);
 
-        const humidityScale = d3
-            .scaleLinear()
+        const humidityScale = scaleLinear()
             .domain([minHumidity, maxHumidity])
             .range([height, 0]);
 
-        const temperatureScale = d3
-            .scaleLinear()
+        const temperatureScale = scaleLinear()
             .domain([minTemp, maxTemp])
             .range([height, 0]);
 
-        const timeScale = d3
-            .scaleTime()
+        const timeScale = scaleTime()
             .domain([new Date(minDate * 1000), new Date(maxDate * 1000)])
             .range([0, width]);
 
@@ -56,19 +56,18 @@ const Chart: React.FC<{ history: History }> = ({ history: full_history }) => {
             .attr('transform', `translate(0,${height})`)
             .attr('class', 'axis')
             .style('text-anchor', 'end')
-            .call(d3.axisBottom(timeScale))
+            .call(axisBottom(timeScale))
             .selectAll('text')
             .attr('transform', 'translate(-10,10)rotate(-45)');
         svg.append('g')
             .attr('class', 'axis')
-            .call(d3.axisLeft(temperatureScale).ticks(7));
+            .call(axisLeft(temperatureScale).ticks(7));
         svg.append('g')
             .attr('class', 'axis')
             .attr('transform', `translate(${width},0)`)
-            .call(d3.axisRight(humidityScale).ticks(5));
+            .call(axisRight(humidityScale).ticks(5));
 
-        const path1 = d3
-            .line<Condition>()
+        const path1 = line<Condition>()
             .x(h => timeScale(new Date(h.timestamp * 1000)))
             .y(h => temperatureScale(h.temperature));
         svg.append('path')
@@ -76,8 +75,7 @@ const Chart: React.FC<{ history: History }> = ({ history: full_history }) => {
             .attr('class', 'Chart_ts-1')
             .attr('d', path1);
 
-        const path2 = d3
-            .line<Condition>()
+        const path2 = line<Condition>()
             .x(h => timeScale(new Date(h.timestamp * 1000)))
             .y(h => humidityScale(h.humidity));
         svg.append('path')
